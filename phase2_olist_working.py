@@ -383,6 +383,107 @@ def analyze_phase2_olist_working():
             
             print(f"{combo_name:25} | p-value: {p_value:.4f} | Cohen's d: {cohens_d:.3f} | Improvement: {improvement:+.1f}%")
     
+    # =================================================================
+    # START: PASTE THIS PLOTTING CODE BLOCK
+    # =================================================================
+    
+    print("\nCreating visualizations for Phase 2...")
+    
+    # Create comprehensive visualizations
+    fig, axes = plt.subplots(3, 3, figsize=(20, 15))
+    fig.suptitle('Phase 2 Olist Analysis Results', fontsize=16, fontweight='bold')
+    
+    # Plot 1: Weekly profit trajectories
+    ax1 = axes[0, 0]
+    baseline_weekly = results['Phase1_Baseline']['test_weekly_profits']
+    weeks = range(1, len(baseline_weekly) + 1)
+    
+    # Plot only the most interesting trajectories
+    ax1.plot(weeks, results['Phase1_Baseline']['test_weekly_profits'], 'o-', label='Baseline', linewidth=2, markersize=4)
+    ax1.plot(weeks, results['Phase1_+_Payment']['test_weekly_profits'], 'o-', label='Payment (Winner)', linewidth=2, markersize=4, color='green')
+    ax1.plot(weeks, results['Phase1_+_Reviews']['test_weekly_profits'], 'o-', label='Reviews (Loser)', linewidth=2, markersize=4, color='red')
+
+    ax1.set_title('Weekly Profit Trajectories', fontweight='bold')
+    ax1.set_xlabel('Test Week')
+    ax1.set_ylabel('Weekly Profit')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # Plot 2: Feature combination comparison
+    ax2 = axes[0, 1]
+    combo_names = list(results.keys())
+    test_profits = [results[combo]['total_test_profit'] for combo in combo_names]
+    
+    bars = ax2.bar(combo_names, test_profits, color=['blue', 'green', 'red', 'orange', 'purple', 'brown', 'pink'])
+    ax2.set_title('Total Test Profit by Feature Combination', fontweight='bold')
+    ax2.set_ylabel('Total Test Profit')
+    ax2.tick_params(axis='x', rotation=45)
+    
+    # Plot 3: Alpha vs Test Profit
+    ax3 = axes[0, 2]
+    alphas = list(alpha_results.keys())
+    alpha_profits = [alpha_results[alpha]['total_test_profit'] for alpha in alphas]
+    
+    ax3.plot(alphas, alpha_profits, 'o-', color='red', linewidth=2, markersize=8)
+    ax3.set_title('Alpha vs Test Profit', fontweight='bold')
+    ax3.set_xlabel('Alpha (Exploration Parameter)')
+    ax3.set_ylabel('Test Profit')
+    ax3.grid(True, alpha=0.3)
+    
+    # Plot 4: Alpha vs Exploration Rate
+    ax4 = axes[1, 0]
+    alpha_exploration = [alpha_results[alpha]['exploration_rate'] for alpha in alphas]
+    
+    ax4.plot(alphas, alpha_exploration, 'o-', color='purple', linewidth=2, markersize=8)
+    ax4.set_title('Alpha vs Exploration Rate', fontweight='bold')
+    ax4.set_xlabel('Alpha (Exploration Parameter)')
+    ax4.set_ylabel('Exploration Rate')
+    ax4.grid(True, alpha=0.3)
+    
+    # Plot 5: Improvement over baseline
+    ax5 = axes[1, 1]
+    baseline_profit = results['Phase1_Baseline']['total_test_profit']
+    improvements = [((results[combo]['total_test_profit'] - baseline_profit) / baseline_profit) * 100 for combo in combo_names]
+    
+    bars = ax5.bar(combo_names, improvements, color=['blue', 'green', 'red', 'orange', 'purple', 'brown', 'pink'])
+    ax5.set_title('Improvement Over Baseline (%)', fontweight='bold')
+    ax5.set_ylabel('Improvement (%)')
+    ax5.tick_params(axis='x', rotation=45)
+    ax5.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+
+    # Plot 6: Average profit by payment type (Olist specific)
+    ax6 = axes[1, 2]
+    payment_profits = data.groupby('payment_type')['total_value'].mean().sort_values(ascending=False)
+    payment_profits.plot(kind='bar', ax=ax6, color='cyan', alpha=0.8)
+    ax6.set_title('Average Order Value by Payment Type', fontweight='bold')
+    ax6.set_xlabel('Payment Type')
+    ax6.set_ylabel('Average Order Value')
+    ax6.tick_params(axis='x', rotation=45)
+    
+    # Plot 7: Average profit by review score (Olist specific)
+    ax7 = axes[2, 0]
+    review_profits = data.groupby('review_score')['total_value'].mean()
+    review_profits.plot(kind='bar', ax=ax7, color='magenta', alpha=0.8)
+    ax7.set_title('Average Order Value by Review Score', fontweight='bold')
+    ax7.set_xlabel('Review Score')
+    ax7.set_ylabel('Average Order Value')
+    ax7.tick_params(axis='x', rotation=0)
+
+    # Hide unused plots
+    axes[2, 1].axis('off')
+    axes[2, 2].axis('off')
+    
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig('phase2_olist_working.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    print("Phase 2 visualization saved to 'phase2_olist_working.png'")
+
+    # =================================================================
+    # END: PASTE THIS PLOTTING CODE BLOCK
+    # =================================================================
+
+
     # Summary and recommendations
     print("\n4. SUMMARY & RECOMMENDATIONS")
     print("=" * 35)
